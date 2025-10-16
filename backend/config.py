@@ -1,0 +1,1 @@
+RAPIDAPI_KEY = "005fa2ba9fmshd4b65b780011d40p1bcc87jsnaa93f6b33cf5"
