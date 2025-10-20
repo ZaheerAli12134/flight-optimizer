@@ -45,7 +45,6 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
     });
   };
 
-  // Function to generate booking link from backend
   const generateBookingLink = async (from: string, to: string, date: string, legIndex: number): Promise<string> => {
     const bookingKey = `${from}-${to}-${date}`;
     
@@ -81,7 +80,6 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
       setLoadingBooking(prev => ({ ...prev, [bookingKey]: false }));
     }
 
-    // Fallback to Google Flights search
     const fallbackUrl = `https://www.google.com/travel/flights?q=Flights%20from%20${encodeURIComponent(from)}%20to%20${encodeURIComponent(to)}%20on%20${date}`;
     return fallbackUrl;
   };
@@ -91,7 +89,6 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
     return `https://www.skyscanner.net/transport/flights/${encodeURIComponent(from.toLowerCase())}/${encodeURIComponent(to.toLowerCase())}/${formattedDate}/?adults=${flightData.passengers.adults}&children=${flightData.passengers.children}&infants=${flightData.passengers.infants}&rtn=0`;
   };
 
-  // Check if the API provided a booking link
   const hasApiBookingLink = (leg: FlightLeg) => {
     return leg.bookingLink || leg.deepLink;
   };
@@ -188,7 +185,6 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
 
                 <div className="booking-section">
                   <div className="booking-options">
-                    {/* Use API-provided booking link if available */}
                     {hasApiBookingLink(leg) ? (
                       <>
                         <a 
@@ -209,7 +205,6 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
                         </a>
                       </>
                     ) : (
-                      /* Generate booking links dynamically */
                       <>
                         <button 
                           onClick={() => handleBookingClick(leg, index)}
@@ -229,12 +224,6 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
                       </>
                     )}
                   </div>
-                  <p className="booking-note">
-                    {hasApiBookingLink(leg) 
-                      ? `Direct booking link for ${leg.from} → ${leg.to}`
-                      : `Click to generate booking link for ${leg.from} → ${leg.to}`
-                    }
-                  </p>
                 </div>
               </div>
             );
@@ -243,12 +232,11 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
 
         <div className="total-booking">
           <h3>Book Your Multi-City Trip</h3>
-          <p>For multi-city trips like this, you can either:</p>
           <div className="booking-tips">
-            <h4>💡 Booking Options:</h4>
+            <h4>Booking Options:</h4>
             <ul>
-              <li><strong>Book individually:</strong> Use the links above for each flight</li>
-              <li><strong>Use Google Flights multi-city:</strong> 
+              <li>Book individually: Use the links above for each flight</li>
+              <li>Use Google Flights multi-city: 
                 <a 
                   href={`https://www.google.com/travel/flights?q=Multi-city%20flights`}
                   target="_blank"

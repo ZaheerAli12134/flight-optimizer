@@ -2,6 +2,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from backend.algorithm import RouteOptimizer
 from backend.flight_routes import router as flight_router
 from backend.iata_lookup import iata_lookup  
@@ -9,14 +14,11 @@ from backend.final_city import router as city_router
 
 import logging
 
-# --- Logging ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- FastAPI App ---
 app = FastAPI()
 
-# --- CORS ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -41,11 +43,9 @@ class TripRequest(BaseModel):
     children: int = 0
     infants: int = 0
 
-# --- Include routers ---
 app.include_router(flight_router)
 app.include_router(city_router)
 
-# --- Existing optimize endpoint ---
 @app.post("/optimize")
 async def optimize_route(trip: TripRequest):
     try:
@@ -67,12 +67,10 @@ async def optimize_route(trip: TripRequest):
         logger.error(f"Error optimizing route: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")
 
-# --- Health check ---
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "Travel Route Optimizer"}
 
-# --- IATA Lookup endpoints ---
 @app.get("/iata")
 async def get_iata(city: str, strategy: str = "largest"):
     """Get IATA code for a city"""

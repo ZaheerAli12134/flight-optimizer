@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './ResultsPage.css';
 import FlightDetailsPage from './FlightDetailsPage';
 
-// UPDATED INTERFACE to match App.tsx
 interface CityWithDays {
   name: string;
   days: number;
@@ -18,7 +17,7 @@ interface SearchData {
   adults: number;
   children: number;
   infants: number;
-  apiResults?: any; // Changed to any to handle different response formats
+  apiResults?: any;
 }
 
 interface Itinerary {
@@ -35,7 +34,6 @@ interface Itinerary {
   total_days?: number;
 }
 
-// Flight details interfaces
 interface FlightLeg {
   from: string;
   to: string;
@@ -63,26 +61,21 @@ interface ResultsPageProps {
 }
 
 const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) => {
-  // FIXED: Handle different response formats safely
   const getResultsArray = (): Itinerary[] => {
     if (!searchData.apiResults) return [];
     
-    // Case 1: Direct array
     if (Array.isArray(searchData.apiResults)) {
       return searchData.apiResults;
     }
     
-    // Case 2: Object with routes property
     if (searchData.apiResults.routes && Array.isArray(searchData.apiResults.routes)) {
       return searchData.apiResults.routes;
     }
     
-    // Case 3: Object with data property
     if (searchData.apiResults.data && Array.isArray(searchData.apiResults.data)) {
       return searchData.apiResults.data;
     }
     
-    console.warn('Unexpected API response format:', searchData.apiResults);
     return [];
   };
 
@@ -99,7 +92,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
     return recommendation.includes('Book now') ? 'recommend-book' : 'recommend-wait';
   };
 
-  // Handle route selection with REAL prices
   const handleSelectRoute = (itinerary: Itinerary) => {
     const flightLegs: FlightLeg[] = [];
     
@@ -107,7 +99,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
       const fromCity = itinerary.route[i];
       const toCity = itinerary.route[i + 1];
       
-      // Use ACTUAL individual prices from algorithm
       const actualPrice = itinerary.individual_prices?.[i] || itinerary.total_cost / (itinerary.route.length - 1);
       const actualDate = itinerary.flight_dates?.[i] || calculateDate(searchData.startDate, itinerary.days_per_city, i);
       
@@ -136,7 +127,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
     setSelectedFlightData(flightData);
   };
 
-  // Helper function to calculate dates
   const calculateDate = (startDate: string, daysPerCity: number[], legIndex: number) => {
     const date = new Date(startDate);
     let totalDays = 0;
@@ -149,44 +139,14 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
     return date.toISOString().split('T')[0];
   };
 
-  // Handle back from flight details
   const handleBackFromDetails = () => {
     setSelectedFlightData(null);
   };
 
-  // Show flight details page if a route is selected
   if (selectedFlightData) {
     return <FlightDetailsPage flightData={selectedFlightData} onBack={handleBackFromDetails} />;
   }
 
-  // Show loading state if no results but search data exists
-  if (results.length === 0 && searchData.startCity) {
-    return (
-      <div className="results-page">
-        <header className="header">
-          <div className="logo">Airplane</div>
-          <button className="new-search-btn" onClick={onNewSearch}>
-            New Search
-          </button>
-        </header>
-        <div className="results-container">
-          <div className="loading-state">
-            <h2>Calculating Optimal Routes...</h2>
-            <div className="loading-spinner"></div>
-            <p>Finding the best routes between your cities. This may take a moment.</p>
-            <div className="search-info">
-              <p><strong>Search Details:</strong></p>
-              <p>From: {searchData.startCity} → To: {searchData.endCity}</p>
-              <p>Via: {searchData.middleCities.map(city => city.name).join(', ')}</p>
-              <p>Dates: {searchData.startDate} to {searchData.endDate}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show no results state
   if (results.length === 0) {
     return (
       <div className="results-page">
@@ -200,7 +160,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
           <div className="no-results">
             <h2>No Routes Found</h2>
             <p>We couldn't find any routes matching your search criteria.</p>
-            <p>Please try adjusting your search parameters.</p>
             <button className="retry-btn" onClick={onNewSearch}>
               Try Different Search
             </button>
@@ -300,9 +259,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
         </div>
 
         <div className="results-footer">
-          <div className="tips">
-            <p>💡 <strong>Tip:</strong> Higher confidence scores indicate more stable prices. Book now recommendations suggest current prices are favorable.</p>
-          </div>
           <button className="secondary-search-btn" onClick={onNewSearch}>
             Start New Search
           </button>

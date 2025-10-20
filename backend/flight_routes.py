@@ -5,7 +5,6 @@ router = APIRouter()
 
 @router.get("/api/airport-lookup/{city_name}")
 async def airport_lookup(city_name: str):
-    """Look up IATA code for a city using local dataset"""
     try:
         iata_code = iata_lookup.get_iata_for_city(city_name, strategy="largest")
         
@@ -25,7 +24,6 @@ async def airport_lookup(city_name: str):
 
 @router.get("/api/city-suggestions")
 async def get_city_suggestions(query: str):
-    """Get city suggestions using local dataset"""
     try:
         if len(query) < 2:
             return {"suggestions": []}

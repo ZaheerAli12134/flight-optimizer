@@ -79,13 +79,11 @@
   border-color: #667eea;
 }
 
-/* Autocomplete Container - SINGLE DEFINITION */
 .autocomplete-container {
   position: relative;
   width: 100%;
 }
 
-/* Suggestions Dropdown - SINGLE DEFINITION */
 .suggestions-dropdown {
   position: absolute;
   top: 100%;
@@ -171,7 +169,6 @@
   font-weight: bold;
 }
 
-/* Passenger Selectors */
 .passenger-selectors {
   display: flex;
   gap: 0.5rem;
@@ -193,7 +190,6 @@
   padding: 0.5rem;
 }
 
-/* Search Button */
 .search-button {
   padding: 0.75rem 2rem;
   background: #667eea;
@@ -211,7 +207,6 @@
   background: #5a6fd8;
 }
 
-/* Date Info */
 .date-info {
   font-size: 0.8rem;
   color: #666;
@@ -219,7 +214,6 @@
   font-style: italic;
 }
 
-/* Utility Classes */
 .disabled {
   opacity: 0.6;
   pointer-events: none;

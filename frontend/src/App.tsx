@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import ResultsPage from './ResultsPage';
-import LoadingPage from './LoadingPage';
 
 interface CityWithDays {
   name: string;
@@ -22,7 +21,6 @@ interface SearchData {
 }
 
 function App() {
-  // Form state
   const [numberOfCities, setNumberOfCities] = useState(2);
   const [startCity, setStartCity] = useState('');
   const [endCity, setEndCity] = useState('');
@@ -34,30 +32,25 @@ function App() {
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
      
-  // Navigation state
-  const [currentPage, setCurrentPage] = useState<'search' | 'loading' | 'results'>('search');
+  const [currentPage, setCurrentPage] = useState<'search' | 'results'>('search');
   const [searchData, setSearchData] = useState<SearchData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // City suggestions state - now just strings from backend
   const [startCitySuggestions, setStartCitySuggestions] = useState<string[]>([]);
   const [endCitySuggestions, setEndCitySuggestions] = useState<string[]>([]);
   const [middleCitySuggestions, setMiddleCitySuggestions] = useState<string[][]>([[]]);
   
-  // Debounce refs
   const startCityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const endCityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const middleCityTimeoutRefs = useRef<{[key: number]: NodeJS.Timeout | null}>({});
 
-  // API function to get city suggestions from backend
   const fetchCitySuggestions = async (query: string): Promise<string[]> => {
     if (query.length < 2) return [];
     
     try {
-      console.log(`🔍 Fetching suggestions for: "${query}"`);
       const response = await fetch(`http://localhost:8000/api/city-suggestions?query=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
-        console.log(`✅ Got suggestions from backend:`, data.suggestions);
         return data.suggestions || [];
       }
     } catch (error) {
@@ -66,7 +59,6 @@ function App() {
     return [];
   };
 
-  // Update middle cities when number of cities changes
   useEffect(() => {
     const middleCitiesCount = Math.max(0, numberOfCities - 2);
     if (middleCitiesCount > middleCities.length) {
@@ -88,12 +80,10 @@ function App() {
     }
   }, [numberOfCities, middleCities.length]);
      
-  // Update total days when middle city days change
   useEffect(() => {
     const total = middleCities.reduce((sum, city) => sum + city.days, 0);
     setTotalDays(total);
     
-    // Auto-update end date when total days changes
     if (startDate && total > 0) {
       const start = new Date(startDate);
       const end = new Date(start);
@@ -102,14 +92,11 @@ function App() {
     }
   }, [middleCities, startDate]);
 
-  // City autocomplete functions with debouncing
   const handleStartCityChange = async (value: string) => {
     setStartCity(value);
     
-    // Clear previous timeout
     if (startCityTimeoutRef.current) {
       clearTimeout(startCityTimeoutRef.current);
-      startCityTimeoutRef.current = null;
     }
     
     if (value.length < 2) {
@@ -117,7 +104,6 @@ function App() {
       return;
     }
     
-    // Set new timeout for API call
     startCityTimeoutRef.current = setTimeout(async () => {
       const suggestions = await fetchCitySuggestions(value);
       setStartCitySuggestions(suggestions);
@@ -127,10 +113,8 @@ function App() {
   const handleEndCityChange = async (value: string) => {
     setEndCity(value);
     
-    // Clear previous timeout
     if (endCityTimeoutRef.current) {
       clearTimeout(endCityTimeoutRef.current);
-      endCityTimeoutRef.current = null;
     }
     
     if (value.length < 2) {
@@ -149,7 +133,6 @@ function App() {
     newMiddleCities[index].name = value;
     setMiddleCities(newMiddleCities);
 
-    // Clear previous timeout for this index
     if (middleCityTimeoutRefs.current[index]) {
       clearTimeout(middleCityTimeoutRefs.current[index]!);
       middleCityTimeoutRefs.current[index] = null;
@@ -162,7 +145,6 @@ function App() {
       return;
     }
     
-    // Set new timeout for API call
     middleCityTimeoutRefs.current[index] = setTimeout(async () => {
       const suggestions = await fetchCitySuggestions(value);
       const newSuggestions = [...middleCitySuggestions];
@@ -195,17 +177,13 @@ function App() {
     }
   };
 
-  // Extract IATA code from display text for backend
   const extractIataCode = (displayText: string): string => {
-    // Format: "City (IATA) - Airport Name"
     const match = displayText.match(/\(([A-Z]{3})\)/);
     return match ? match[1] : displayText;
   };
 
-  // Date range validation
   const handleStartDateChange = (date: string) => {
     setStartDate(date);
-    // For 2 cities, set end date to same as start date (no stay duration needed)
     if (date && numberOfCities === 2) {
       setEndDate(date);
     } else if (date && totalDays > 0) {
@@ -226,14 +204,12 @@ function App() {
     return maxDate.toISOString().split('T')[0];
   };
 
-  // SEARCH FUNCTION - Extract IATA codes before sending to backend
   const handleSearch = async () => {
     if (!startCity || !endCity) {
       alert('Please enter both start and end cities');
       return;
     }
 
-    // For 3+ cities, check if middle cities have days set
     if (numberOfCities > 2 && totalDays === 0) {
       alert('Please set stay durations for your middle cities');
       return;
@@ -244,7 +220,6 @@ function App() {
       return;
     }
 
-    // For 2 cities, no need to validate date range since it's same day
     if (numberOfCities > 2) {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -256,7 +231,6 @@ function App() {
       }
     }
 
-    // Extract IATA codes from display text
     const processedStartCity = extractIataCode(startCity);
     const processedEndCity = extractIataCode(endCity);
     const processedMiddleCities = middleCities
@@ -278,11 +252,9 @@ function App() {
       infants
     };
     
-    setCurrentPage('loading');
+    setIsLoading(true);
     
     try {
-      console.log('Sending to FastAPI:', data);
-      
       const response = await fetch('http://localhost:8000/optimize', {
         method: 'POST',
         headers: {
@@ -302,7 +274,6 @@ function App() {
       });
       
       const apiResults = await response.json();
-      console.log('Received from FastAPI:', apiResults);
       
       setSearchData({
         ...data,
@@ -317,10 +288,11 @@ function App() {
         apiResults: []
       });
       setCurrentPage('results');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (startCityTimeoutRef.current) {
@@ -337,25 +309,24 @@ function App() {
     };
   }, []);
 
-  // Navigation check
   if (currentPage === 'results' && searchData) {
     return <ResultsPage searchData={searchData} onNewSearch={() => setCurrentPage('search')} />;
-  }
-
-  if (currentPage === 'loading' && searchData) {
-    return <LoadingPage searchData={searchData} />;
   }
 
   return (
     <div className="App">
       <header className="header">
         <div className="logo">Airplane</div>
+        {isLoading && (
+          <div className="loading-notice">
+            Finding optimal routes...
+          </div>
+        )}
       </header>
 
       <div className="search-container">
         <h2>Find Your Optimal Travel Route</h2>
         
-        {/* First Row */}
         <div className="search-row">
           <div className="input-group">
             <label>Total Cities</label>
@@ -377,6 +348,7 @@ function App() {
                 placeholder="e.g., London"
                 value={startCity}
                 onChange={(e) => handleStartCityChange(e.target.value)}
+                disabled={isLoading}
               />
               {startCitySuggestions.length > 0 && (
                 <div className="suggestions-dropdown">
@@ -402,6 +374,7 @@ function App() {
                 placeholder="e.g., Paris" 
                 value={endCity}
                 onChange={(e) => handleEndCityChange(e.target.value)}
+                disabled={isLoading}
               />
               {endCitySuggestions.length > 0 && (
                 <div className="suggestions-dropdown">
@@ -420,7 +393,6 @@ function App() {
           </div>
         </div>
 
-        {/* Middle Cities Row - Only show for 3+ cities */}
         {numberOfCities > 2 && (
           <div className="search-row">
             <div className="input-group">
@@ -434,6 +406,7 @@ function App() {
                         placeholder={`City ${index + 1}`}
                         value={city.name}
                         onChange={(e) => handleMiddleCityChange(e.target.value, index)}
+                        disabled={isLoading}
                       />
                       {middleCitySuggestions[index] && middleCitySuggestions[index].length > 0 && (
                         <div className="suggestions-dropdown">
@@ -457,6 +430,7 @@ function App() {
                         value={city.days}
                         onChange={(e) => handleMiddleDaysChange(Number(e.target.value), index)}
                         className="number-input small"
+                        disabled={isLoading}
                       />
                       <span>days</span>
                     </div>
@@ -471,7 +445,6 @@ function App() {
           </div>
         )}
 
-        {/* Dates Row */}
         <div className="search-row">
           <div className="input-group">
             <label>Start Date</label>
@@ -481,6 +454,7 @@ function App() {
               onChange={(e) => handleStartDateChange(e.target.value)}
               min={getMinDate()}
               max={getMaxDate()}
+              disabled={isLoading}
             />
           </div>
 
@@ -492,7 +466,8 @@ function App() {
               onChange={(e) => setEndDate(e.target.value)}
               min={startDate || getMinDate()}
               max={getMaxDate()}
-              readOnly={numberOfCities > 2} // Only read-only for 3+ cities
+              readOnly={numberOfCities > 2}
+              disabled={isLoading}
             />
             <div className="date-info">
               {numberOfCities === 2 ? 'Direct flight (same day)' : 
@@ -505,7 +480,7 @@ function App() {
             <div className="passenger-selectors">
               <div className="passenger-type">
                 <span>Adults:</span>
-                <select value={adults} onChange={(e) => setAdults(Number(e.target.value))}>
+                <select value={adults} onChange={(e) => setAdults(Number(e.target.value))} disabled={isLoading}>
                   {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
                     <option key={num} value={num}>{num}</option>
                   ))}
@@ -513,7 +488,7 @@ function App() {
               </div>
               <div className="passenger-type">
                 <span>Children:</span>
-                <select value={children} onChange={(e) => setChildren(Number(e.target.value))}>
+                <select value={children} onChange={(e) => setChildren(Number(e.target.value))} disabled={isLoading}>
                   {[0, 1, 2, 3, 4, 5, 6].map(num => (
                     <option key={num} value={num}>{num}</option>
                   ))}
@@ -521,7 +496,7 @@ function App() {
               </div>
               <div className="passenger-type">
                 <span>Infants:</span>
-                <select value={infants} onChange={(e) => setInfants(Number(e.target.value))}>
+                <select value={infants} onChange={(e) => setInfants(Number(e.target.value))} disabled={isLoading}>
                   {[0, 1, 2, 3].map(num => (
                     <option key={num} value={num}>{num}</option>
                   ))}
@@ -530,8 +505,12 @@ function App() {
             </div>
           </div>
 
-          <button className="search-button" onClick={handleSearch}>
-            Find Optimal Route
+          <button 
+            className={`search-button ${isLoading ? 'disabled' : ''}`} 
+            onClick={handleSearch}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Finding Routes...' : 'Find Optimal Route'}
           </button>
         </div>
       </div>
