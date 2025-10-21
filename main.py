@@ -19,13 +19,16 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://flight-optimizer-azure.vercel.app/"],
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # --- Data Models ---
 class CityInput(BaseModel):
@@ -49,7 +52,7 @@ app.include_router(city_router)
 @app.post("/optimize")
 async def optimize_route(trip: TripRequest):
     try:
-        logger.info(f"🚀 Received trip request: {trip}")
+        logger.info(f" Received trip request: {trip}")
         middle_cities_dict = [{"name": city.name, "days": city.days} for city in trip.middle_cities]
         optimizer = RouteOptimizer(adults=trip.adults, children=trip.children, infants=trip.infants)
         optimal_routes = optimizer.find_optimal_routes(
