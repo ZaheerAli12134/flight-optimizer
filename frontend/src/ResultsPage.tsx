@@ -24,8 +24,6 @@ interface Itinerary {
   route: string[];
   days_per_city: number[];
   total_cost: number;
-  confidence: number;
-  recommendation: string;
   num_flights?: number;
   individual_prices?: number[];
   flight_dates?: string[];
@@ -45,8 +43,6 @@ interface FlightDetailsData {
   route: string[];
   days_per_city: number[];
   total_cost: number;
-  confidence: number;
-  recommendation: string;
   flightLegs: FlightLeg[];
   passengers: {
     adults: number;
@@ -82,16 +78,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
   const results: Itinerary[] = getResultsArray();
   const [selectedFlightData, setSelectedFlightData] = useState<FlightDetailsData | null>(null);
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence > 0.8) return 'high-confidence';
-    if (confidence > 0.6) return 'medium-confidence';
-    return 'low-confidence';
-  };
-
-  const getRecommendationColor = (recommendation: string) => {
-    return recommendation.includes('Book now') ? 'recommend-book' : 'recommend-wait';
-  };
-
   const handleSelectRoute = (itinerary: Itinerary) => {
     const flightLegs: FlightLeg[] = [];
     
@@ -114,8 +100,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
       route: itinerary.route,
       days_per_city: itinerary.days_per_city,
       total_cost: itinerary.total_cost,
-      confidence: itinerary.confidence,
-      recommendation: itinerary.recommendation,
       flightLegs: flightLegs,
       passengers: {
         adults: searchData.adults,
@@ -198,9 +182,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
             <div key={index} className="itinerary-card">
               <div className="card-header">
                 <h3>Option {index + 1}</h3>
-                <div className={`confidence-badge ${getConfidenceColor(itinerary.confidence)}`}>
-                  {(itinerary.confidence * 100).toFixed(0)}% Confidence
-                </div>
               </div>
 
               <div className="route-display">
@@ -232,12 +213,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
                   <span className="label">Total Days:</span>
                   <span className="value">{itinerary.total_days || itinerary.days_per_city.reduce((sum, days) => sum + days, 0)} days</span>
                 </div>
-                <div className="detail">
-                  <span className="label">Recommendation:</span>
-                  <span className={`value ${getRecommendationColor(itinerary.recommendation)}`}>
-                    {itinerary.recommendation}
-                  </span>
-                </div>
               </div>
 
               <div className="card-actions">
@@ -246,12 +221,6 @@ const ResultsPage: React.FC<ResultsPageProps> = ({ searchData, onNewSearch }) =>
                   onClick={() => handleSelectRoute(itinerary)}
                 >
                   View Flight Details
-                </button>
-                <button 
-                  className="select-btn secondary" 
-                  onClick={() => handleSelectRoute(itinerary)}
-                >
-                  Quick View
                 </button>
               </div>
             </div>

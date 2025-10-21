@@ -145,6 +145,10 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
           </div>
         </div>
 
+        <div className="google-flights-tip">
+          <p>When using Google Flights links, make sure to change the trip type to "One-way" since these are individual flight segments.</p>
+        </div>
+
         <div className="flight-legs">
           <h3>Flight Details</h3>
           {flightData.flightLegs.map((leg, index) => {
@@ -193,7 +197,7 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
                           rel="noopener noreferrer"
                           className="book-btn google-btn primary"
                         >
-                          ✈️ Book This Flight
+                          Book This Flight
                         </a>
                         <a 
                           href={getSkyscannerLink(leg.from, leg.to, leg.date)}
@@ -201,7 +205,7 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
                           rel="noopener noreferrer"
                           className="book-btn google-btn secondary"
                         >
-                          🔍 Compare on Skyscanner
+                          Compare on Skyscanner
                         </a>
                       </>
                     ) : (
@@ -211,7 +215,7 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
                           disabled={isBookingLoading}
                           className={`book-btn google-btn primary ${isBookingLoading ? 'loading' : ''}`}
                         >
-                          {isBookingLoading ? '⏳ Generating...' : '✈️ Book This Flight'}
+                          {isBookingLoading ? 'Generating...' : 'Book This Flight'}
                         </button>
                         <a 
                           href={getSkyscannerLink(leg.from, leg.to, leg.date)}
@@ -219,7 +223,7 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
                           rel="noopener noreferrer"
                           className="book-btn google-btn secondary"
                         >
-                          🔍 Search on Skyscanner
+                          Search on Skyscanner
                         </a>
                       </>
                     )}
@@ -236,16 +240,7 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
             <h4>Booking Options:</h4>
             <ul>
               <li>Book individually: Use the links above for each flight</li>
-              <li>Use Google Flights multi-city: 
-                <a 
-                  href={`https://www.google.com/travel/flights?q=Multi-city%20flights`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-link"
-                > Open Multi-City Search</a>
-              </li>
               <li>Consider booking directly with airlines for better flexibility</li>
-              <li>Allow 2-3 hours between flights for connections</li>
             </ul>
           </div>
         </div>

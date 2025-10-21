@@ -198,11 +198,6 @@ class RouteOptimizer:
         
         all_routes.sort(key=lambda x: x['total_cost'])
         
-        for route in all_routes[:num_results]:
-            base_confidence = max(0.5, 1.0 - (route['total_cost'] / 5000))
-            route['confidence'] = round(base_confidence, 2)
-            route['recommendation'] = "Book now" if base_confidence > 0.7 else "Wait for better prices"
-        
         return all_routes[:num_results]
     
     def _calculate_route_cost_with_dates_and_prices(self, route: List[str], days_per_city: List[int], start_date: str) -> Tuple[float, List[float], List[str]]:
