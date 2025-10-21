@@ -44,11 +44,13 @@ function App() {
   const endCityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const middleCityTimeoutRefs = useRef<{[key: number]: NodeJS.Timeout | null}>({});
 
+  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
   const fetchCitySuggestions = async (query: string): Promise<string[]> => {
     if (query.length < 2) return [];
     
     try {
-      const response = await fetch(`http://localhost:8000/api/city-suggestions?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_BASE}/api/city-suggestions?query=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];
@@ -78,7 +80,7 @@ function App() {
       setMiddleCities(middleCities.slice(0, middleCitiesCount));
       setMiddleCitySuggestions(prev => prev.slice(0, middleCitiesCount));
     }
-  }, [numberOfCities, middleCities.length]);
+  }, [numberOfCities, middleCities.length, middleCities]);
      
   useEffect(() => {
     const total = middleCities.reduce((sum, city) => sum + city.days, 0);
@@ -255,7 +257,7 @@ function App() {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:8000/optimize', {
+      const response = await fetch(`${API_BASE}/optimize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -282,7 +284,7 @@ function App() {
       setCurrentPage('results');
       
     } catch (error) {
-      console.error('Error calling FastAPI:', error);
+      console.error('Error calling API:', error);
       setSearchData({
         ...data,
         apiResults: []

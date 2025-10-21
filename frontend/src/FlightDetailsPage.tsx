@@ -35,6 +35,8 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
   const [bookingLinks, setBookingLinks] = useState<{[key: string]: string}>({});
   const [loadingBooking, setLoadingBooking] = useState<{[key: string]: boolean}>({});
 
+  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB', { 
@@ -55,7 +57,7 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
     setLoadingBooking(prev => ({ ...prev, [bookingKey]: true }));
 
     try {
-      const response = await fetch('http://localhost:8000/api/generate-booking-link', {
+      const response = await fetch(`${API_BASE}/api/generate-booking-link`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -240,7 +242,16 @@ const FlightDetailsPage: React.FC<FlightDetailsPageProps> = ({ flightData, onBac
             <h4>Booking Options:</h4>
             <ul>
               <li>Book individually: Use the links above for each flight</li>
+              <li>Use Google Flights multi-city: 
+                <a 
+                  href={`https://www.google.com/travel/flights?q=Multi-city%20flights`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-link"
+                > Open Multi-City Search</a>
+              </li>
               <li>Consider booking directly with airlines for better flexibility</li>
+              <li>Allow 2-3 hours between flights for connections</li>
             </ul>
           </div>
         </div>
